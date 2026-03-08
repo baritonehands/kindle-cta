@@ -1,0 +1,4 @@
+github.com/simsor/go-kindle v0.0.0-20210102172844-934a3d0627e4 h1:J9dSjaZMRu39UNFjhJhjrtzpcMdSDan/pUPt6pSyViY=
+github.com/simsor/go-kindle v0.0.0-20210102172844-934a3d0627e4/go.mod h1:ZwT9B16XrB21FHg2mK7uFA+boAEeUQBwSGcfDjmta1c=
+golang.org/x/sys v0.0.0-20201223074533-0d417f636930 h1:vRgIt+nup/B/BwIS0g2oC0haq0iqbV3ZA+u6+0TlNCo=
+golang.org/x/sys v0.0.0-20201223074533-0d417f636930/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
