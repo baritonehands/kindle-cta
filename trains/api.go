@@ -1,0 +1,40 @@
+package trains
+
+import (
+	"encoding/json"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+
+	"github.com/baritonehands/kindle-cta/domain"
+)
+
+func GetArrivals(httpClient *http.Client, stationId string) (*domain.TrainArrivalsResponse, error) {
+	apiUrl, _ := url.Parse("http://lapi.transitchicago.com/api/1.0/ttarrivals.aspx")
+	params := apiUrl.Query()
+	params.Set("key", os.Getenv("CTA_TRAIN_TRACKER_API_KEY"))
+	params.Set("max", "8")
+	params.Set("mapid", stationId)
+	params.Set("outputType", "JSON")
+	apiUrl.RawQuery = params.Encode()
+
+	resp, err := httpClient.Get(apiUrl.String())
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK && strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") {
+		decoder := json.NewDecoder(resp.Body)
+		jsonObj := domain.TrainArrivalsResponse{}
+		err = decoder.Decode(&jsonObj)
+		if err != nil {
+			return nil, err
+		}
+		return &jsonObj, nil
+	}
+
+	return nil, err
+}
