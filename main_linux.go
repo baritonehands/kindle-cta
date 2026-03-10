@@ -17,8 +17,7 @@ func main() {
 
 	f, _ := utils.LoadFont("FreeSans.ttf")
 
-	img := &ui.FramebufferImage{kindle.Framebuffer()}
-	fontRenderer := ui.NewFontRenderer(f, img, 12)
+	fontRenderer := ui.NewFontRenderer(f, kindle.Framebuffer(), 12)
 	charHeight := fontRenderer.CharHeight()
 	charWidth := charHeight / 2
 
