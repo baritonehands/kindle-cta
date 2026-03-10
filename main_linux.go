@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"image/color"
 	"net/http"
 	"time"
 
 	"github.com/baritonehands/kindle-cta/trains"
+	"github.com/baritonehands/kindle-cta/ui"
 	"github.com/baritonehands/kindle-cta/utils"
 	"github.com/simsor/go-kindle/kindle"
 )
@@ -17,26 +16,24 @@ func main() {
 	}
 
 	resp, _ := trains.GetArrivals(client, "40570")
-	//fmt.Println(resp, err)
+
+	f, _ := utils.LoadFont("FreeSans.ttf")
 
 	kindle.ClearScreen()
 
-	for y := range []int{0, 799} {
-		for x := range []int{0, 599} {
-			kindle.Framebuffer().Set(x, y, color.Black)
-		}
-	}
+	img := &ui.FramebufferImage{kindle.Framebuffer()}
+	fontRenderer := ui.NewFontRenderer(f, img, 12)
+	charHeight := fontRenderer.CharHeight()
+	charWidth := charHeight / 2
 
-	kindle.DrawText(2, 1, "O\u2019Hare")
+	fontRenderer.PrintAt(0, 0, resp.Root.Etas[0].StationName)
 	for idx, eta := range resp.Root.Etas {
-		kindle.DrawText(4, idx+2, utils.CleanupString(eta.DestName))
+		fontRenderer.PrintAt(2*charWidth, (idx+1)*charHeight, eta.DestName)
 	}
 
-	ke := kindle.WaitForKey()
-
-	kindle.DrawText(10, 20, fmt.Sprintf("You pressed this key: %v", ke.KeyCode))
+	testItem := ui.ArrivalItem{Device: kindle.Framebuffer(), Width: 600, Height: 100, Margin: 10}
+	testItem.Render()
+	kindle.Framebuffer().DirtyRefresh()
 
 	time.Sleep(5 * time.Second)
-
-	kindle.ClearScreen()
 }
