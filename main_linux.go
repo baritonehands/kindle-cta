@@ -15,25 +15,29 @@ func main() {
 		Timeout: 5 * time.Second,
 	}
 
-	resp, _ := trains.GetArrivals(client, "40570")
-
 	f, _ := utils.LoadFont("FreeSans.ttf")
-
-	kindle.ClearScreen()
 
 	img := &ui.FramebufferImage{kindle.Framebuffer()}
 	fontRenderer := ui.NewFontRenderer(f, img, 12)
 	charHeight := fontRenderer.CharHeight()
 	charWidth := charHeight / 2
 
-	fontRenderer.PrintAt(0, 0, resp.Root.Etas[0].StationName)
-	for idx, eta := range resp.Root.Etas {
-		fontRenderer.PrintAt(2*charWidth, (idx+1)*charHeight, eta.DestName)
+	kindle.ClearScreen()
+	//testItem := ui.ArrivalItem{Device: kindle.Framebuffer(), Width: 600, Height: 100, Margin: 10}
+
+	for {
+
+		resp, _ := trains.GetArrivals(client, "40570")
+
+		fontRenderer.PrintAt(0, 0, resp.Root.Etas[0].StationName)
+		for idx, eta := range resp.Root.Etas {
+			fontRenderer.PrintAt(2*charWidth, (idx+1)*charHeight, eta.DestName)
+			fontRenderer.PrintAt(20*charWidth, (idx+1)*charHeight, eta.ArrivalTime.String())
+		}
+
+		//testItem.Render()
+		kindle.Framebuffer().FullRefresh()
+
+		time.Sleep(30 * time.Second)
 	}
-
-	testItem := ui.ArrivalItem{Device: kindle.Framebuffer(), Width: 600, Height: 100, Margin: 10}
-	testItem.Render()
-	kindle.Framebuffer().DirtyRefresh()
-
-	time.Sleep(5 * time.Second)
 }
