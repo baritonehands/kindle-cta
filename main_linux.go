@@ -1,12 +1,12 @@
 package main
 
 import (
+	"image/color"
 	"net/http"
 	"time"
 
 	"github.com/baritonehands/kindle-cta/trains"
 	"github.com/baritonehands/kindle-cta/ui"
-	"github.com/baritonehands/kindle-cta/utils"
 	"github.com/simsor/go-kindle/kindle"
 )
 
@@ -15,27 +15,33 @@ func main() {
 		Timeout: 5 * time.Second,
 	}
 
-	f, _ := utils.LoadFont("FreeSans.ttf")
-
-	fontRenderer := ui.NewFontRenderer(f, kindle.Framebuffer(), 12)
-	charHeight := fontRenderer.CharHeight()
-	charWidth := charHeight / 2
-
 	kindle.ClearScreen()
-	//testItem := ui.ArrivalItem{Device: kindle.Framebuffer(), Width: 600, Height: 100, Margin: 10}
+	trainHeader := ui.NewTrainHeader(0, 0, 600, 60)
+
+	device := kindle.Framebuffer()
+	// Draw grid to help UI debugging
+	for y := 0; y < 800; y++ {
+		for x := 0; x < 600; x++ {
+			if x%50 == 0 || y%50 == 0 {
+				device.Set(x, y, color.Gray{128})
+			}
+		}
+	}
 
 	for {
 
 		resp, _ := trains.GetArrivals(client, "40570")
+		trainHeader.Text = resp.Root.Etas[0].StationName
 
-		fontRenderer.PrintAt(0, 0, resp.Root.Etas[0].StationName)
 		for idx, eta := range resp.Root.Etas {
-			fontRenderer.PrintAt(2*charWidth, (idx+1)*charHeight, eta.DestName)
-			fontRenderer.PrintAt(20*charWidth, (idx+1)*charHeight, eta.ArrivalTime.String())
+			arrivalItem := ui.NewArrivalItem(0, 60+(80*idx), 600, 80)
+			arrivalItem.Eta = &eta
+
+			arrivalItem.Render(device)
 		}
 
-		//testItem.Render()
-		kindle.Framebuffer().FullRefresh()
+		trainHeader.Render(device)
+		device.FullRefresh()
 
 		time.Sleep(30 * time.Second)
 	}

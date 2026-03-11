@@ -13,17 +13,17 @@ import (
 	"github.com/golang/freetype/truetype"
 )
 
-func LoadFont(name string) (*truetype.Font, error) {
+func LoadFont(name string) *truetype.Font {
 	fontBytes, err := os.ReadFile(name)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	f, err := freetype.ParseFont(fontBytes)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return f, nil
+	return f
 }
 
 const spacing = 1.5

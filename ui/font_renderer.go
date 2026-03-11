@@ -1,7 +1,9 @@
 package ui
 
 import (
+	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"strings"
 
@@ -13,7 +15,7 @@ const dpi = 167 // Kindle 4
 
 type FontRenderer struct {
 	context       *freetype.Context
-	Size, Spacing float64
+	size, spacing float64
 }
 
 func NewFontRenderer(font *truetype.Font, dst draw.Image, size float64) *FontRenderer {
@@ -24,23 +26,33 @@ func NewFontRenderer(font *truetype.Font, dst draw.Image, size float64) *FontRen
 	c.SetClip(dst.Bounds())
 	c.SetDst(dst)
 	c.SetSrc(image.Black)
-	return &FontRenderer{context: c, Size: size, Spacing: 1.5}
+	return &FontRenderer{context: c, size: size, spacing: 1.5}
 }
 
 func (r *FontRenderer) PrintAt(x, y int, text string) error {
 	lines := strings.Split(text, "\n")
 	// Draw the text.
-	pt := freetype.Pt(x, y+int(r.context.PointToFixed(r.Size)>>6))
+	pt := freetype.Pt(x, y+int(r.context.PointToFixed(r.size)>>6))
 	for _, s := range lines {
+		fmt.Printf("Drawing text at: %v\n", pt)
 		_, err := r.context.DrawString(s, pt)
 		if err != nil {
 			return err
 		}
-		pt.Y += r.context.PointToFixed(r.Size * r.Spacing)
+		pt.Y += r.context.PointToFixed(r.size * r.spacing)
 	}
 	return nil
 }
 
 func (r *FontRenderer) CharHeight() int {
-	return r.context.PointToFixed(r.Size * r.Spacing).Round()
+	return r.context.PointToFixed(r.size * r.spacing).Round()
+}
+
+func (r *FontRenderer) SetFontSize(fontSize float64) {
+	r.size = fontSize
+	r.context.SetFontSize(fontSize)
+}
+
+func (r *FontRenderer) SetFontColor(color color.Color) {
+	r.context.SetSrc(image.NewUniform(color))
 }

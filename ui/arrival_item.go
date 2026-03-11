@@ -1,31 +1,40 @@
 package ui
 
 import (
-	"image/color"
+	"fmt"
+	"image"
 
+	"github.com/baritonehands/kindle-cta/domain"
 	"github.com/simsor/go-kindle/framebuffer"
 )
 
 type ArrivalItem struct {
-	Device          *framebuffer.Device
-	Padding, Margin int
-	Width, Height   int
+	Component
+	Eta *domain.TrainEta
 }
 
-func (item *ArrivalItem) Render() {
-	xMin := item.Margin
-	xMax := item.Width - item.Margin
-	yMin := item.Margin
-	yMax := item.Height - item.Margin
+func NewArrivalItem(x, y int, width, height int) ArrivalItem {
+	component := NewComponent(x, y, width, height)
+	component.Padding = 10
 
-	for y := yMin; y < yMax; y++ {
-		if y == yMin || y == yMax-1 {
-			for x := xMin; x < xMax; x++ {
-				item.Device.Set(x, y, color.Black)
-			}
-		} else {
-			item.Device.Set(xMin, y, color.Black)
-			item.Device.Set(xMax-1, y, color.Black)
-		}
+	return ArrivalItem{
+		Component: component,
+	}
+}
+
+func (item *ArrivalItem) Render(device *framebuffer.Device) {
+	item.Component.Render(device)
+
+	if item.Eta != nil {
+		header := fmt.Sprintf("%s Line #%s to", item.Eta.Route, item.Eta.Run)
+		headerPos := item.Translate(image.Pt(0, 0))
+		fmt.Printf("Printing header at %d,%d\n", headerPos.X, headerPos.Y)
+		Regular8PtBlack.PrintAt(headerPos.X, headerPos.Y, header)
+
+		destPos := item.Translate(image.Pt(0, 24))
+		Bold12PtBlack.PrintAt(destPos.X, destPos.Y, item.Eta.DestName)
+
+		arrivalPos := item.Translate(image.Pt(400, 5))
+		Bold18PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, item.Eta.ArrivalTime.String())
 	}
 }

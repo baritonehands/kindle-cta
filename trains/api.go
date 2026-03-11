@@ -5,16 +5,19 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/baritonehands/kindle-cta/domain"
 )
 
+const maxResults = 4
+
 func GetArrivals(httpClient *http.Client, stationId string) (*domain.TrainArrivalsResponse, error) {
 	apiUrl, _ := url.Parse("http://lapi.transitchicago.com/api/1.0/ttarrivals.aspx")
 	params := apiUrl.Query()
 	params.Set("key", os.Getenv("CTA_TRAIN_TRACKER_API_KEY"))
-	params.Set("max", "8")
+	params.Set("max", strconv.Itoa(maxResults))
 	params.Set("mapid", stationId)
 	params.Set("outputType", "JSON")
 	apiUrl.RawQuery = params.Encode()
