@@ -2,31 +2,39 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
-	"github.com/baritonehands/kindle-cta/trains"
-	"github.com/baritonehands/kindle-cta/utils"
+	"github.com/baritonehands/kindle-cta/buses"
+	"github.com/baritonehands/kindle-cta/domain"
 )
+
+var routesToFetch = map[string][]string{
+	"73": {"4049", "4116"},
+	"82": {"18262", "11150"},
+}
 
 func main() {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
 
-	f, _ := utils.LoadFont("assets/FreeSans.ttf")
-	fmt.Println(f)
+	routes, _ := buses.GetRoutes(client)
+	fmt.Println(routes)
 
-	err := utils.WriteTextToFile(f, 16, "Hello World!")
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	//fmt.Println(buses.GetStops(client, "82", "Northbound"))
+	//fmt.Println(buses.GetStops(client, "82", "Southbound"))
 
-	resp, err := trains.GetArrivals(client, "40570")
-	for _, eta := range resp.Root.Etas {
-		fmt.Println(utils.CleanupString(eta.DestName))
+	for routeId, stopIds := range routesToFetch {
+		var route *domain.BusRoute
+		for _, r := range routes.Root.Routes {
+			if r.RouteId == routeId {
+				route = &r
+				break
+			}
+		}
+
+		fmt.Println(route)
+		fmt.Println(buses.GetArrivals(client, stopIds...))
 	}
-	fmt.Println(resp, err)
 }

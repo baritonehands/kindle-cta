@@ -8,30 +8,30 @@ import (
 	"github.com/simsor/go-kindle/framebuffer"
 )
 
-type ArrivalItem struct {
+type TrainArrivalItem struct {
 	Component
 	Eta *domain.TrainEta
 }
 
-func NewArrivalItem(x, y int, width, height int) ArrivalItem {
+func NewTrainArrivalItem(x, y int, width, height int) TrainArrivalItem {
 	component := NewComponent(x, y, width, height)
-	component.Padding = 10
+	component.Padding = 5
 
-	return ArrivalItem{
+	return TrainArrivalItem{
 		Component: component,
 	}
 }
 
-func (item *ArrivalItem) Render(device *framebuffer.Device) {
+func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 	item.Component.Render(device)
 
 	if item.Eta != nil {
 		header := fmt.Sprintf("%s Line #%s to", item.Eta.Route, item.Eta.Run)
-		headerPos := item.Translate(image.Pt(0, 0))
+		headerPos := item.Translate(image.Pt(5, 0))
 		fmt.Printf("Printing header at %d,%d\n", headerPos.X, headerPos.Y)
 		Regular8PtBlack.PrintAt(headerPos.X, headerPos.Y, header)
 
-		destPos := item.Translate(image.Pt(0, 24))
+		destPos := item.Translate(image.Pt(5, 24))
 		Bold12PtBlack.PrintAt(destPos.X, destPos.Y, item.Eta.DestName)
 
 		arrivalPos := item.Translate(image.Pt(400, 5))
