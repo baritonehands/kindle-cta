@@ -16,7 +16,7 @@ var Regular8PtBlack = NewFontRenderer(FontFreeSansRegular, kindle.Framebuffer(),
 var Regular12PtBlack = NewFontRenderer(FontFreeSansRegular, kindle.Framebuffer(), 12)
 var Regular12PtWhite = NewFontRenderer(FontFreeSansRegular, kindle.Framebuffer(), 12)
 var Bold12PtBlack = NewFontRenderer(FontFreeSansBold, kindle.Framebuffer(), 12)
-var Bold18PtBlack = NewFontRenderer(FontFreeSansBold, kindle.Framebuffer(), 18)
+var Bold16PtBlack = NewFontRenderer(FontFreeSansBold, kindle.Framebuffer(), 16)
 
 func init() {
 	fmt.Println("Initializing constants")

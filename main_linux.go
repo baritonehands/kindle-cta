@@ -17,12 +17,10 @@ import (
 const (
 	trainItemHeight = 70
 	busItemHeight   = 70
+	headerHeight    = 50
 )
 
-var busRoutesToFetch = map[string][]string{
-	"73": {"4049", "4116"},
-	"82": {"18262", "11150"},
-}
+var busRoutesToFetch = []string{"4049", "4116", "18262", "11150"}
 
 func main() {
 	client := &http.Client{
@@ -33,8 +31,8 @@ func main() {
 	}
 
 	kindle.ClearScreen()
-	trainHeader := ui.NewTrainHeader(0, 0, 600, 60)
-	busHeader := ui.NewTrainHeader(0, 340, 600, 60)
+	trainHeader := ui.NewTrainHeader(0, 0, 600, headerHeight)
+	busHeader := ui.NewTrainHeader(0, 330, 600, headerHeight)
 	busHeader.Text = "Buses"
 
 	device := kindle.Framebuffer()
@@ -54,7 +52,7 @@ func main() {
 		trainHeader.Render(device)
 
 		for idx, eta := range resp.Root.Etas {
-			arrivalItem := ui.NewTrainArrivalItem(0, 60+(trainItemHeight*idx), 600, trainItemHeight)
+			arrivalItem := ui.NewTrainArrivalItem(0, headerHeight+(trainItemHeight*idx), 600, trainItemHeight)
 			arrivalItem.Eta = &eta
 
 			arrivalItem.Render(device)
@@ -65,27 +63,22 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		uiItemIdx := 0
-		for routeId, stopIds := range busRoutesToFetch {
+		arrivals, _ := buses.GetArrivals(client, busRoutesToFetch...)
+		fmt.Println("arrivals", arrivals)
+		for idx, eta := range arrivals.Root.Etas {
 			var route *domain.BusRoute
 			for _, r := range routes.Root.Routes {
-				if r.RouteId == routeId {
+				if r.RouteId == eta.RouteId {
 					route = &r
 					break
 				}
 			}
-			fmt.Println("route", route)
 
-			arrivals, _ := buses.GetArrivals(client, stopIds...)
-			fmt.Println("arrivals", arrivals)
-			for _, eta := range arrivals.Root.Etas {
-				busArrivalItem := ui.NewBusArrivalItem(0, 400+(busItemHeight*uiItemIdx), 600, busItemHeight)
-				busArrivalItem.Route = route
-				busArrivalItem.Eta = &eta
+			busArrivalItem := ui.NewBusArrivalItem(0, 380+(busItemHeight*idx), 600, busItemHeight)
+			busArrivalItem.Route = route
+			busArrivalItem.Eta = &eta
 
-				busArrivalItem.Render(device)
-				uiItemIdx++
-			}
+			busArrivalItem.Render(device)
 		}
 
 		device.FullRefresh()

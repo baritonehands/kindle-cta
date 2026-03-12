@@ -13,7 +13,7 @@ type TrainHeader struct {
 
 func NewTrainHeader(x, y, width, height int) TrainHeader {
 	component := NewComponent(x, y, width, height)
-	component.Padding = 5
+	component.Padding = 2
 
 	return TrainHeader{
 		Component: component,
@@ -23,6 +23,6 @@ func NewTrainHeader(x, y, width, height int) TrainHeader {
 func (t *TrainHeader) Render(device *framebuffer.Device) {
 	t.Component.Render(device)
 
-	textPos := t.Translate(image.Pt(5, 0))
-	Bold18PtBlack.PrintAt(textPos.X, textPos.Y, t.Text)
+	textPos := t.Translate(image.Pt(8, 0))
+	Bold16PtBlack.PrintAt(textPos.X, textPos.Y, t.Text)
 }

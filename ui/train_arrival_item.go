@@ -34,7 +34,7 @@ func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 		destPos := item.Translate(image.Pt(5, 24))
 		Bold12PtBlack.PrintAt(destPos.X, destPos.Y, item.Eta.DestName)
 
-		arrivalPos := item.Translate(image.Pt(400, 5))
-		Bold18PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, item.Eta.ArrivalTime.String())
+		arrivalPos := item.Translate(image.Pt(425, 5))
+		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, item.Eta.ArrivalTime.String())
 	}
 }

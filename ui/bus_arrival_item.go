@@ -38,13 +38,13 @@ func (item *BusArrivalItem) Render(device *framebuffer.Device) {
 		destPos := item.Translate(image.Pt(5, 32))
 		Regular8PtBlack.PrintAt(destPos.X, destPos.Y, dest)
 
-		arrival := item.Eta.ArrivalPrediction
+		arrival := " " + item.Eta.ArrivalPrediction
 		arrivalInMins, err := strconv.Atoi(item.Eta.ArrivalPrediction)
 		if err == nil {
 			arrival = fmt.Sprintf("%2d mins", arrivalInMins)
 		}
 
-		arrivalPos := item.Translate(image.Pt(400, 5))
-		Bold18PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, arrival)
+		arrivalPos := item.Translate(image.Pt(425, 5))
+		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, arrival)
 	}
 }
