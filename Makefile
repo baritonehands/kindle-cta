@@ -14,7 +14,7 @@ install: build
 	scp $(GOBIN)/myapp root@192.168.15.244:/mnt/us/extensions/hello/myapp
 
 assets:
-	scp -R $(ASSETS)/* root@192.168.15.244:/mnt/us/extensions/hello/assets
+	scp -r $(ASSETS)/ config.xml menu.json run.sh root@192.168.15.244:/mnt/us/extensions/hello
 
 clean:
 	rm -rf $(GOBIN)

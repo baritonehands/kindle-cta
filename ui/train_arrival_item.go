@@ -3,6 +3,8 @@ package ui
 import (
 	"fmt"
 	"image"
+	"math"
+	"time"
 
 	"github.com/baritonehands/kindle-cta/domain"
 	"github.com/simsor/go-kindle/framebuffer"
@@ -34,7 +36,9 @@ func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 		destPos := item.Translate(image.Pt(5, 24))
 		Bold12PtBlack.PrintAt(destPos.X, destPos.Y, item.Eta.DestName)
 
+		now := time.Now()
+		arrival := math.Round(time.Time(item.Eta.ArrivalTime).Sub(now).Minutes())
 		arrivalPos := item.Translate(image.Pt(425, 5))
-		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, item.Eta.ArrivalTime.String())
+		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, fmt.Sprintf("%v mins", arrival))
 	}
 }
