@@ -38,7 +38,7 @@ func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 
 		now := time.Now()
 		arrival := math.Round(time.Time(item.Eta.ArrivalTime).Sub(now).Minutes())
-		arrivalPos := item.Translate(image.Pt(425, 5))
+		arrivalPos := item.Translate(image.Pt(440, 5))
 		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, fmt.Sprintf("%v mins", arrival))
 	}
 }

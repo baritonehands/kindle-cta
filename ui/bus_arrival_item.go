@@ -44,7 +44,7 @@ func (item *BusArrivalItem) Render(device *framebuffer.Device) {
 			arrival = fmt.Sprintf("%2d mins", arrivalInMins)
 		}
 
-		arrivalPos := item.Translate(image.Pt(425, 5))
+		arrivalPos := item.Translate(image.Pt(440, 5))
 		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, arrival)
 	}
 }
