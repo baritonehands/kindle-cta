@@ -23,7 +23,7 @@ const (
 	Debug           = false
 )
 
-var busRoutesToFetch = []string{"4049", "4116", "18262", "11150"}
+var busRoutesToFetch = []string{"4049", "4116", "18262", "11150", "1323", "1249"}
 
 func exitOnInput() {
 	_ = kindle.WaitForKey()
