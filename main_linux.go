@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/baritonehands/kindle-cta/buses"
@@ -21,6 +22,12 @@ const (
 )
 
 var busRoutesToFetch = []string{"4049", "4116", "18262", "11150"}
+
+func exitOnInput() {
+	_ = kindle.WaitForKey()
+	kindle.ClearScreen()
+	os.Exit(0)
+}
 
 func main() {
 	client := &http.Client{
@@ -44,6 +51,8 @@ func main() {
 			}
 		}
 	}
+
+	go exitOnInput()
 
 	for {
 

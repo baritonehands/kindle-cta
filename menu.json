@@ -5,12 +5,6 @@
       "action": "./run.sh",
       "exitmenu": false,
       "refresh": false
-    },
-    {
-      "name": "Run KindleCta (test)",
-      "action": "./myapp",
-      "exitmenu": false,
-      "refresh": false
     }
   ]
 }
