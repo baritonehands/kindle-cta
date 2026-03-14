@@ -5,6 +5,6 @@ export CTA_BUS_TRACKER_API_KEY=<paste>
 
 /usr/bin/lipc-set-prop -- com.lab126.powerd preventScreenSaver 1
 
-./myapp
+./myapp > /var/log/kindle-cta.log
 
 /usr/bin/lipc-set-prop -- com.lab126.powerd preventScreenSaver 0

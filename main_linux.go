@@ -20,7 +20,6 @@ const (
 	trainItemHeight = 70
 	busItemHeight   = 70
 	headerHeight    = 50
-	Debug           = false
 )
 
 var busRoutesToFetch = []string{"4049", "4116", "18262", "11150", "1323", "1249"}
@@ -64,78 +63,102 @@ func main() {
 		trainArrivalItems[idx] = ui.NewTrainArrivalItem(0, headerHeight+(trainItemHeight*idx), 600, trainItemHeight)
 	}
 	trainArrivalText := ui.NewText(0, headerHeight, 600, trainItemHeight)
-	trainArrivalText.Value = "No train arrivals"
 
 	busArrivalItems := make([]ui.BusArrivalItem, buses.ApiMaxResults)
 	for idx := 0; idx < buses.ApiMaxResults; idx++ {
 		busArrivalItems[idx] = ui.NewBusArrivalItem(0, 380+(busItemHeight*idx), 600, busItemHeight)
 	}
 	busArrivalText := ui.NewText(0, 380, 600, busItemHeight)
-	busArrivalText.Value = "No bus arrivals"
+
+	routes, err := buses.GetRoutes(client)
+	if err != nil {
+		panic(err)
+	}
 
 	firstRender := true
 	for {
 
-		trainArrivals, _ := trains.GetArrivals(client, "40570")
-		trainHeader.Text = fmt.Sprintf("%s %s Line", trainArrivals.Root.Etas[0].StationName, trainArrivals.Root.Etas[0].Route)
-		trainHeader.Render(device)
-
-		for idx := 0; idx < trains.ApiMaxResults; idx++ {
-			trainArrivalItem := trainArrivalItems[idx]
-			if idx < len(trainArrivals.Root.Etas) {
-				eta := &trainArrivals.Root.Etas[idx]
-				trainArrivalItem.SetEta(eta)
-			} else {
+		trainArrivals, err := trains.GetArrivals(client, "40570")
+		if err != nil {
+			trainArrivalText.Value = err.Error()
+			for idx := 0; idx < trains.ApiMaxResults; idx++ {
+				trainArrivalItem := trainArrivalItems[idx]
 				trainArrivalItem.SetEta(nil)
+				trainArrivalItem.Render(device)
 			}
-			trainArrivalItem.Render(device)
-		}
-
-		if len(trainArrivals.Root.Etas) == 0 {
 			trainArrivalText.Show()
+			trainArrivalText.Render(device)
 		} else {
-			trainArrivalText.Hide()
+			trainHeader.Text = fmt.Sprintf("%s %s Line", trainArrivals.Root.Etas[0].StationName, trainArrivals.Root.Etas[0].Route)
+			trainHeader.Render(device)
+
+			for idx := 0; idx < trains.ApiMaxResults; idx++ {
+				trainArrivalItem := trainArrivalItems[idx]
+				if idx < len(trainArrivals.Root.Etas) {
+					eta := &trainArrivals.Root.Etas[idx]
+					trainArrivalItem.SetEta(eta)
+				} else {
+					trainArrivalItem.SetEta(nil)
+				}
+				trainArrivalItem.Render(device)
+			}
+
+			if len(trainArrivals.Root.Etas) == 0 {
+				trainArrivalText.Value = "No train arrivals"
+				trainArrivalText.Show()
+			} else {
+				trainArrivalText.Hide()
+			}
+			trainArrivalText.Render(device)
 		}
-		trainArrivalText.Render(device)
 
 		busHeader.Render(device)
-		routes, err := buses.GetRoutes(client)
 		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		busArrivals, _ := buses.GetArrivals(client, busRoutesToFetch...)
-		fmt.Println("busArrivals", busArrivals)
-		for idx := 0; idx < buses.ApiMaxResults; idx++ {
-			busArrivalItem := busArrivalItems[idx]
-			if idx < len(busArrivals.Root.Etas) {
-				eta := &busArrivals.Root.Etas[idx]
-				var route *domain.BusRoute
-				for _, r := range routes.Root.Routes {
-					if r.RouteId == eta.RouteId {
-						route = &r
-						break
+			busArrivalText.Value = err.Error()
+			for idx := 0; idx < buses.ApiMaxResults; idx++ {
+				busArrivalItem := busArrivalItems[idx]
+				busArrivalItem.SetEta(nil)
+				busArrivalItem.Render(device)
+			}
+			busArrivalText.Show()
+			busArrivalText.Render(device)
+		} else {
+			busArrivals, _ := buses.GetArrivals(client, busRoutesToFetch...)
+			if ui.Debug {
+				fmt.Println("busArrivals", busArrivals)
+			}
+			for idx := 0; idx < buses.ApiMaxResults; idx++ {
+				busArrivalItem := busArrivalItems[idx]
+				if idx < len(busArrivals.Root.Etas) {
+					eta := &busArrivals.Root.Etas[idx]
+					var route *domain.BusRoute
+					for _, r := range routes.Root.Routes {
+						if r.RouteId == eta.RouteId {
+							route = &r
+							break
+						}
 					}
+
+					busArrivalItem.Route = route
+					busArrivalItem.SetEta(eta)
+				} else {
+					busArrivalItem.Route = nil
+					busArrivalItem.SetEta(nil)
 				}
 
-				busArrivalItem.Route = route
-				busArrivalItem.SetEta(eta)
-			} else {
-				busArrivalItem.Route = nil
-				busArrivalItem.SetEta(nil)
+				busArrivalItem.Render(device)
 			}
 
-			busArrivalItem.Render(device)
+			if len(busArrivals.Root.Etas) == 0 {
+				busArrivalText.Value = "No bus arrivals"
+				busArrivalText.Show()
+			} else {
+				busArrivalText.Hide()
+			}
+			busArrivalText.Render(device)
 		}
 
-		if len(busArrivals.Root.Etas) == 0 {
-			busArrivalText.Show()
-		} else {
-			busArrivalText.Hide()
-		}
-		busArrivalText.Render(device)
-
-		if Debug {
+		if ui.Debug {
 			renderDebugGrid(device)
 		}
 

@@ -26,7 +26,6 @@ func NewTrainArrivalItem(x, y int, width, height int) TrainArrivalItem {
 
 func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 	if item.eta == nil {
-		item.Component.Hide()
 		item.Component.Render(device)
 	} else if item.dirty {
 		item.Component.clear(device)
@@ -34,7 +33,9 @@ func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 
 		header := fmt.Sprintf("%s Line #%s to", item.eta.Route, item.eta.Run)
 		headerPos := item.Translate(image.Pt(5, 0))
-		fmt.Printf("Printing header at %d,%d\n", headerPos.X, headerPos.Y)
+		if Debug {
+			fmt.Printf("Printing header at %d,%d\n", headerPos.X, headerPos.Y)
+		}
 		Regular8PtBlack.PrintAt(headerPos.X, headerPos.Y, header)
 
 		destPos := item.Translate(image.Pt(5, 24))

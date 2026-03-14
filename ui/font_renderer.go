@@ -34,7 +34,9 @@ func (r *FontRenderer) PrintAt(x, y int, text string) error {
 	// Draw the text.
 	pt := freetype.Pt(x, y+int(r.context.PointToFixed(r.size)>>6))
 	for _, s := range lines {
-		fmt.Printf("Drawing text at: %v\n", pt)
+		if Debug {
+			fmt.Printf("Drawing text at: %v\n", pt)
+		}
 		_, err := r.context.DrawString(s, pt)
 		if err != nil {
 			return err

@@ -34,7 +34,9 @@ func (item *BusArrivalItem) Render(device *framebuffer.Device) {
 
 		header := fmt.Sprintf("#%s %s", item.Route.RouteId, item.Route.RouteName)
 		headerPos := item.Translate(image.Pt(5, 0))
-		fmt.Printf("BusArrivalItem: Printing header at %d,%d\n", headerPos.X, headerPos.Y)
+		if Debug {
+			fmt.Printf("BusArrivalItem: Printing header at %d,%d\n", headerPos.X, headerPos.Y)
+		}
 		Bold12PtBlack.PrintAt(headerPos.X, headerPos.Y, header)
 
 		dest := fmt.Sprintf("%s to %s", strings.ToLower(item.eta.RouteDir), item.eta.DestName)

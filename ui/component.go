@@ -58,10 +58,14 @@ func (c *Component) Render(device *framebuffer.Device) {
 	yMin := c.Bounds.Min.Y + c.Margin
 	yMax := c.Bounds.Max.Y - c.Margin
 
-	fmt.Printf("Printing vertical border at %d,%d\n", xMin, xMax)
+	if Debug {
+		fmt.Printf("Printing vertical border at %d,%d\n", xMin, xMax)
+	}
 	for y := yMin; y < yMax; y++ {
 		if y == yMin || y == yMax-1 {
-			fmt.Printf("Printing horizontal border at %d\n", y)
+			if Debug {
+				fmt.Printf("Printing horizontal border at %d\n", y)
+			}
 			for x := xMin; x < xMax; x++ {
 				device.Set(x, y, c.BorderColor)
 			}

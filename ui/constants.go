@@ -18,6 +18,8 @@ var Regular12PtWhite = NewFontRenderer(FontFreeSansRegular, kindle.Framebuffer()
 var Bold12PtBlack = NewFontRenderer(FontFreeSansBold, kindle.Framebuffer(), 12)
 var Bold16PtBlack = NewFontRenderer(FontFreeSansBold, kindle.Framebuffer(), 16)
 
+const Debug = false
+
 func init() {
 	fmt.Println("Initializing constants")
 	Regular12PtWhite.SetFontColor(color.White)
