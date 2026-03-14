@@ -26,7 +26,7 @@ func NewTrainArrivalItem(x, y int, width, height int) TrainArrivalItem {
 
 func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 	if item.eta == nil {
-		item.Component.hide()
+		item.Component.Hide()
 		item.Component.Render(device)
 	} else if item.dirty {
 		item.Component.clear(device)
@@ -42,8 +42,12 @@ func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 
 		now := time.Now()
 		arrival := math.Round(time.Time(item.eta.ArrivalTime).Sub(now).Minutes())
+		arrivalStr := "DUE"
+		if arrival > 0 {
+			arrivalStr = fmt.Sprintf("%v mins", arrival)
+		}
 		arrivalPos := item.Translate(image.Pt(440, 5))
-		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, fmt.Sprintf("%v mins", arrival))
+		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, arrivalStr)
 
 		item.dirty = false
 	}
@@ -51,9 +55,9 @@ func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
 
 func (item *TrainArrivalItem) SetEta(eta *domain.TrainEta) {
 	if eta == nil {
-		item.Component.hide()
+		item.Component.Hide()
 	} else {
-		item.Component.show()
+		item.Component.Show()
 	}
 
 	prev := item.eta

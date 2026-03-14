@@ -63,11 +63,15 @@ func main() {
 	for idx := 0; idx < trains.ApiMaxResults; idx++ {
 		trainArrivalItems[idx] = ui.NewTrainArrivalItem(0, headerHeight+(trainItemHeight*idx), 600, trainItemHeight)
 	}
+	trainArrivalText := ui.NewText(0, headerHeight, 600, trainItemHeight)
+	trainArrivalText.Value = "No train arrivals"
 
 	busArrivalItems := make([]ui.BusArrivalItem, buses.ApiMaxResults)
 	for idx := 0; idx < buses.ApiMaxResults; idx++ {
 		busArrivalItems[idx] = ui.NewBusArrivalItem(0, 380+(busItemHeight*idx), 600, busItemHeight)
 	}
+	busArrivalText := ui.NewText(0, 380, 600, busItemHeight)
+	busArrivalText.Value = "No bus arrivals"
 
 	firstRender := true
 	for {
@@ -86,6 +90,13 @@ func main() {
 			}
 			trainArrivalItem.Render(device)
 		}
+
+		if len(trainArrivals.Root.Etas) == 0 {
+			trainArrivalText.Show()
+		} else {
+			trainArrivalText.Hide()
+		}
+		trainArrivalText.Render(device)
 
 		busHeader.Render(device)
 		routes, err := buses.GetRoutes(client)
@@ -116,6 +127,13 @@ func main() {
 
 			busArrivalItem.Render(device)
 		}
+
+		if len(busArrivals.Root.Etas) == 0 {
+			busArrivalText.Show()
+		} else {
+			busArrivalText.Hide()
+		}
+		busArrivalText.Render(device)
 
 		if Debug {
 			renderDebugGrid(device)

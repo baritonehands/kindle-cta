@@ -41,10 +41,10 @@ func (item *BusArrivalItem) Render(device *framebuffer.Device) {
 		destPos := item.Translate(image.Pt(5, 32))
 		Regular8PtBlack.PrintAt(destPos.X, destPos.Y, dest)
 
-		arrival := " " + item.eta.ArrivalPrediction
+		arrival := item.eta.ArrivalPrediction
 		arrivalInMins, err := strconv.Atoi(item.eta.ArrivalPrediction)
 		if err == nil {
-			arrival = fmt.Sprintf("%2d mins", arrivalInMins)
+			arrival = fmt.Sprintf("%d mins", arrivalInMins)
 		}
 
 		arrivalPos := item.Translate(image.Pt(440, 5))
@@ -56,9 +56,9 @@ func (item *BusArrivalItem) Render(device *framebuffer.Device) {
 
 func (item *BusArrivalItem) SetEta(eta *domain.BusEta) {
 	if eta == nil {
-		item.Component.hide()
+		item.Component.Hide()
 	} else {
-		item.Component.show()
+		item.Component.Show()
 	}
 
 	prev := item.eta

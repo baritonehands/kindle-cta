@@ -72,13 +72,13 @@ func (c *Component) Render(device *framebuffer.Device) {
 	}
 }
 
-func (c *Component) hide() {
+func (c *Component) Hide() {
 	prev := c.visible
 	c.visible = false
 	c.dirty = c.dirty || prev != c.visible
 }
 
-func (c *Component) show() {
+func (c *Component) Show() {
 	prev := c.visible
 	c.visible = true
 	c.dirty = c.dirty || prev != c.visible
