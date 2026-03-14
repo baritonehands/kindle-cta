@@ -12,6 +12,7 @@ import (
 	"github.com/baritonehands/kindle-cta/domain"
 	"github.com/baritonehands/kindle-cta/trains"
 	"github.com/baritonehands/kindle-cta/ui"
+	"github.com/simsor/go-kindle/framebuffer"
 	"github.com/simsor/go-kindle/kindle"
 )
 
@@ -19,6 +20,7 @@ const (
 	trainItemHeight = 70
 	busItemHeight   = 70
 	headerHeight    = 50
+	Debug           = false
 )
 
 var busRoutesToFetch = []string{"4049", "4116", "18262", "11150"}
@@ -27,6 +29,17 @@ func exitOnInput() {
 	_ = kindle.WaitForKey()
 	kindle.ClearScreen()
 	os.Exit(0)
+}
+
+func renderDebugGrid(device *framebuffer.Device) {
+	// Draw grid to help UI debugging
+	for y := 0; y < 800; y++ {
+		for x := 0; x < 600; x++ {
+			if x%50 == 0 || y%50 == 0 {
+				device.Set(x, y, color.Gray{128})
+			}
+		}
+	}
 }
 
 func main() {
@@ -43,54 +56,77 @@ func main() {
 	busHeader.Text = "Buses"
 
 	device := kindle.Framebuffer()
-	// Draw grid to help UI debugging
-	for y := 0; y < 800; y++ {
-		for x := 0; x < 600; x++ {
-			if x%50 == 0 || y%50 == 0 {
-				device.Set(x, y, color.Gray{128})
-			}
-		}
-	}
 
 	go exitOnInput()
 
+	trainArrivalItems := make([]ui.TrainArrivalItem, trains.ApiMaxResults)
+	for idx := 0; idx < trains.ApiMaxResults; idx++ {
+		trainArrivalItems[idx] = ui.NewTrainArrivalItem(0, headerHeight+(trainItemHeight*idx), 600, trainItemHeight)
+	}
+
+	busArrivalItems := make([]ui.BusArrivalItem, buses.ApiMaxResults)
+	for idx := 0; idx < buses.ApiMaxResults; idx++ {
+		busArrivalItems[idx] = ui.NewBusArrivalItem(0, 380+(busItemHeight*idx), 600, busItemHeight)
+	}
+
+	firstRender := true
 	for {
 
-		resp, _ := trains.GetArrivals(client, "40570")
-		trainHeader.Text = fmt.Sprintf("%s %s Line", resp.Root.Etas[0].StationName, resp.Root.Etas[0].Route)
+		trainArrivals, _ := trains.GetArrivals(client, "40570")
+		trainHeader.Text = fmt.Sprintf("%s %s Line", trainArrivals.Root.Etas[0].StationName, trainArrivals.Root.Etas[0].Route)
 		trainHeader.Render(device)
 
-		for idx, eta := range resp.Root.Etas {
-			arrivalItem := ui.NewTrainArrivalItem(0, headerHeight+(trainItemHeight*idx), 600, trainItemHeight)
-			arrivalItem.Eta = &eta
-
-			arrivalItem.Render(device)
+		for idx := 0; idx < trains.ApiMaxResults; idx++ {
+			trainArrivalItem := trainArrivalItems[idx]
+			if idx < len(trainArrivals.Root.Etas) {
+				eta := &trainArrivals.Root.Etas[idx]
+				trainArrivalItem.SetEta(eta)
+			} else {
+				trainArrivalItem.SetEta(nil)
+			}
+			trainArrivalItem.Render(device)
 		}
 
 		busHeader.Render(device)
 		routes, err := buses.GetRoutes(client)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			continue
 		}
-		arrivals, _ := buses.GetArrivals(client, busRoutesToFetch...)
-		fmt.Println("arrivals", arrivals)
-		for idx, eta := range arrivals.Root.Etas {
-			var route *domain.BusRoute
-			for _, r := range routes.Root.Routes {
-				if r.RouteId == eta.RouteId {
-					route = &r
-					break
+		busArrivals, _ := buses.GetArrivals(client, busRoutesToFetch...)
+		fmt.Println("busArrivals", busArrivals)
+		for idx := 0; idx < buses.ApiMaxResults; idx++ {
+			busArrivalItem := busArrivalItems[idx]
+			if idx < len(busArrivals.Root.Etas) {
+				eta := &busArrivals.Root.Etas[idx]
+				var route *domain.BusRoute
+				for _, r := range routes.Root.Routes {
+					if r.RouteId == eta.RouteId {
+						route = &r
+						break
+					}
 				}
-			}
 
-			busArrivalItem := ui.NewBusArrivalItem(0, 380+(busItemHeight*idx), 600, busItemHeight)
-			busArrivalItem.Route = route
-			busArrivalItem.Eta = &eta
+				busArrivalItem.Route = route
+				busArrivalItem.SetEta(eta)
+			} else {
+				busArrivalItem.Route = nil
+				busArrivalItem.SetEta(nil)
+			}
 
 			busArrivalItem.Render(device)
 		}
 
-		device.FullRefresh()
+		if Debug {
+			renderDebugGrid(device)
+		}
+
+		if firstRender {
+			device.FullRefresh()
+			firstRender = false
+		} else {
+			device.DirtyRefresh()
+		}
 
 		time.Sleep(30 * time.Second)
 	}

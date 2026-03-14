@@ -12,6 +12,7 @@ type Component struct {
 	Bounds          image.Rectangle
 	Padding, Margin int
 	BorderColor     color.Color
+	visible, dirty  bool
 }
 
 func NewComponent(x, y int, width, height int) Component {
@@ -22,6 +23,8 @@ func NewComponent(x, y int, width, height int) Component {
 			Max: image.Pt(x+width, y+height),
 		},
 		BorderColor: color.Black,
+		visible:     true,
+		dirty:       true,
 	}
 }
 
@@ -29,7 +32,27 @@ func (c *Component) Translate(pos image.Point) image.Point {
 	return c.Bounds.Min.Add(pos).Add(image.Pt(c.Margin+c.Padding, c.Margin+c.Padding))
 }
 
+func (c *Component) clear(device *framebuffer.Device) {
+	for y := c.Bounds.Min.Y; y < c.Bounds.Max.Y; y++ {
+		for x := c.Bounds.Min.X; x < c.Bounds.Max.X; x++ {
+			device.Set(x, y, color.White)
+		}
+	}
+}
+
 func (c *Component) Render(device *framebuffer.Device) {
+	if !c.visible {
+		if c.dirty {
+			c.clear(device)
+			c.dirty = false
+		}
+		return
+	}
+
+	if !c.dirty {
+		return
+	}
+
 	xMin := c.Bounds.Min.X + c.Margin
 	xMax := c.Bounds.Max.X - c.Margin
 	yMin := c.Bounds.Min.Y + c.Margin
@@ -47,6 +70,18 @@ func (c *Component) Render(device *framebuffer.Device) {
 			device.Set(xMax-1, y, c.BorderColor)
 		}
 	}
+}
+
+func (c *Component) hide() {
+	prev := c.visible
+	c.visible = false
+	c.dirty = c.dirty || prev != c.visible
+}
+
+func (c *Component) show() {
+	prev := c.visible
+	c.visible = true
+	c.dirty = c.dirty || prev != c.visible
 }
 
 type Renderable interface {

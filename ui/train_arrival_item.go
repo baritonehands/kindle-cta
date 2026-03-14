@@ -12,7 +12,7 @@ import (
 
 type TrainArrivalItem struct {
 	Component
-	Eta *domain.TrainEta
+	eta *domain.TrainEta
 }
 
 func NewTrainArrivalItem(x, y int, width, height int) TrainArrivalItem {
@@ -25,20 +25,38 @@ func NewTrainArrivalItem(x, y int, width, height int) TrainArrivalItem {
 }
 
 func (item *TrainArrivalItem) Render(device *framebuffer.Device) {
-	item.Component.Render(device)
+	if item.eta == nil {
+		item.Component.hide()
+		item.Component.Render(device)
+	} else if item.dirty {
+		item.Component.clear(device)
+		item.Component.Render(device)
 
-	if item.Eta != nil {
-		header := fmt.Sprintf("%s Line #%s to", item.Eta.Route, item.Eta.Run)
+		header := fmt.Sprintf("%s Line #%s to", item.eta.Route, item.eta.Run)
 		headerPos := item.Translate(image.Pt(5, 0))
 		fmt.Printf("Printing header at %d,%d\n", headerPos.X, headerPos.Y)
 		Regular8PtBlack.PrintAt(headerPos.X, headerPos.Y, header)
 
 		destPos := item.Translate(image.Pt(5, 24))
-		Bold12PtBlack.PrintAt(destPos.X, destPos.Y, item.Eta.DestName)
+		Bold12PtBlack.PrintAt(destPos.X, destPos.Y, item.eta.DestName)
 
 		now := time.Now()
-		arrival := math.Round(time.Time(item.Eta.ArrivalTime).Sub(now).Minutes())
+		arrival := math.Round(time.Time(item.eta.ArrivalTime).Sub(now).Minutes())
 		arrivalPos := item.Translate(image.Pt(440, 5))
 		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, fmt.Sprintf("%v mins", arrival))
+
+		item.dirty = false
 	}
+}
+
+func (item *TrainArrivalItem) SetEta(eta *domain.TrainEta) {
+	if eta == nil {
+		item.Component.hide()
+	} else {
+		item.Component.show()
+	}
+
+	prev := item.eta
+	item.eta = eta
+	item.dirty = item.dirty || prev != item.eta
 }

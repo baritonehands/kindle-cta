@@ -12,7 +12,7 @@ import (
 	"github.com/baritonehands/kindle-cta/domain"
 )
 
-const maxResults = 6
+const ApiMaxResults = 6
 
 func ctaBusTrackerUrl(endpoint string, params map[string]string) *url.URL {
 	apiUrl, _ := url.Parse(fmt.Sprintf("https://www.ctabustracker.com/bustime/api/v3/%s", endpoint))
@@ -50,7 +50,7 @@ func GetStops(httpClient *http.Client, routeName, dir string) (map[string]any, e
 func GetArrivals(httpClient *http.Client, stopIds ...string) (domain.BusResponse[domain.BusArrivalsRoot], error) {
 	apiUrl := ctaBusTrackerUrl("getpredictions", map[string]string{
 		"stpid": strings.Join(stopIds, ","),
-		"top":   strconv.Itoa(maxResults),
+		"top":   strconv.Itoa(ApiMaxResults),
 	})
 	return getJsonResponse[domain.BusResponse[domain.BusArrivalsRoot]](httpClient, apiUrl)
 }

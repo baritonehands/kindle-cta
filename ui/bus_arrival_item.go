@@ -13,7 +13,7 @@ import (
 type BusArrivalItem struct {
 	Component
 	Route *domain.BusRoute
-	Eta   *domain.BusEta
+	eta   *domain.BusEta
 }
 
 func NewBusArrivalItem(x, y int, width, height int) BusArrivalItem {
@@ -26,25 +26,42 @@ func NewBusArrivalItem(x, y int, width, height int) BusArrivalItem {
 }
 
 func (item *BusArrivalItem) Render(device *framebuffer.Device) {
-	item.Component.Render(device)
+	if item.eta == nil {
+		item.Component.Render(device)
+	} else if item.dirty {
+		item.Component.clear(device)
+		item.Component.Render(device)
 
-	if item.Eta != nil {
 		header := fmt.Sprintf("#%s %s", item.Route.RouteId, item.Route.RouteName)
 		headerPos := item.Translate(image.Pt(5, 0))
 		fmt.Printf("BusArrivalItem: Printing header at %d,%d\n", headerPos.X, headerPos.Y)
 		Bold12PtBlack.PrintAt(headerPos.X, headerPos.Y, header)
 
-		dest := fmt.Sprintf("%s to %s", strings.ToLower(item.Eta.RouteDir), item.Eta.DestName)
+		dest := fmt.Sprintf("%s to %s", strings.ToLower(item.eta.RouteDir), item.eta.DestName)
 		destPos := item.Translate(image.Pt(5, 32))
 		Regular8PtBlack.PrintAt(destPos.X, destPos.Y, dest)
 
-		arrival := " " + item.Eta.ArrivalPrediction
-		arrivalInMins, err := strconv.Atoi(item.Eta.ArrivalPrediction)
+		arrival := " " + item.eta.ArrivalPrediction
+		arrivalInMins, err := strconv.Atoi(item.eta.ArrivalPrediction)
 		if err == nil {
 			arrival = fmt.Sprintf("%2d mins", arrivalInMins)
 		}
 
 		arrivalPos := item.Translate(image.Pt(440, 5))
 		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, arrival)
+
+		item.dirty = false
 	}
+}
+
+func (item *BusArrivalItem) SetEta(eta *domain.BusEta) {
+	if eta == nil {
+		item.Component.hide()
+	} else {
+		item.Component.show()
+	}
+
+	prev := item.eta
+	item.eta = eta
+	item.dirty = item.dirty || prev != item.eta
 }
