@@ -75,7 +75,7 @@ func main() {
 		panic(err)
 	}
 
-	firstRender := true
+	renderCount := 0
 	for {
 
 		trainArrivals, err := trains.GetArrivals(client, "40570")
@@ -162,12 +162,13 @@ func main() {
 			renderDebugGrid(device)
 		}
 
-		if firstRender {
+		if renderCount == 0 {
 			device.FullRefresh()
-			firstRender = false
 		} else {
 			device.DirtyRefresh()
 		}
+
+		renderCount = (renderCount + 1) % 6
 
 		time.Sleep(30 * time.Second)
 	}
