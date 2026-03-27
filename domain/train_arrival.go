@@ -31,3 +31,7 @@ type TrainEta struct {
 	Lon           string         `json:"lon"`
 	Heading       string         `json:"heading"`
 }
+
+type TrainGroupKey struct {
+	Route, DestName string
+}

@@ -58,7 +58,7 @@ func NewApp(device draw.Image) *App {
 		},
 	}
 	app.trainHeader = NewTrainHeader(0, 0, 600, headerHeight)
-	app.busHeader = NewTrainHeader(0, 330, 600, headerHeight)
+	app.busHeader = NewTrainHeader(0, 260, 600, headerHeight)
 	app.busHeader.Text = "Buses"
 
 	app.trainArrivalItems = make([]*TrainArrivalItem, trains.UiMaxResults)
@@ -69,9 +69,9 @@ func NewApp(device draw.Image) *App {
 
 	app.busArrivalItems = make([]*BusArrivalItem, buses.UiMaxResults)
 	for idx := 0; idx < buses.UiMaxResults; idx++ {
-		app.busArrivalItems[idx] = NewBusArrivalItem(0, 380+(busItemHeight*idx), 600, busItemHeight)
+		app.busArrivalItems[idx] = NewBusArrivalItem(0, 310+(busItemHeight*idx), 600, busItemHeight)
 	}
-	app.busArrivalText = NewText(0, 380, 600, busItemHeight)
+	app.busArrivalText = NewText(0, 310, 600, busItemHeight)
 	return app
 }
 
@@ -89,7 +89,6 @@ func (app *App) Run() {
 			app.trainArrivalText.Value = err.Error()
 			for idx := 0; idx < trains.ApiMaxResults; idx++ {
 				trainArrivalItem := app.trainArrivalItems[idx]
-				trainArrivalItem.SetEta(nil)
 				trainArrivalItem.Render(app.device)
 			}
 			app.trainArrivalText.Show()
@@ -98,13 +97,19 @@ func (app *App) Run() {
 			app.trainHeader.Text = fmt.Sprintf("%s %s Line", trainArrivals.Root.Etas[0].StationName, trainArrivals.Root.Etas[0].Route)
 			app.trainHeader.Render(app.device)
 
+			trainGroups := utils.GroupBy(trainArrivals.Root.Etas, func(item domain.TrainEta) domain.TrainGroupKey {
+				return domain.TrainGroupKey{Route: item.Route, DestName: item.DestName}
+			})
+			sort.Slice(trainGroups, func(i, j int) bool {
+				return fmt.Sprint(trainGroups[i][0].ArrivalTime) < fmt.Sprint(trainGroups[j][0].ArrivalTime)
+			})
 			for idx := 0; idx < trains.UiMaxResults; idx++ {
 				trainArrivalItem := app.trainArrivalItems[idx]
-				if idx < len(trainArrivals.Root.Etas) {
-					eta := &trainArrivals.Root.Etas[idx]
-					trainArrivalItem.SetEta(eta)
+				if idx < len(trainGroups) {
+					etas := trainGroups[idx]
+					trainArrivalItem.SetEtas(etas)
 				} else {
-					trainArrivalItem.SetEta(nil)
+					trainArrivalItem.SetEtas([]domain.TrainEta{})
 				}
 				trainArrivalItem.Render(app.device)
 			}
@@ -119,6 +124,7 @@ func (app *App) Run() {
 		}
 
 		app.busHeader.Render(app.device)
+		busArrivals, err := buses.GetArrivals(app.client, busRoutesToFetch...)
 		if err != nil {
 			app.busArrivalText.Value = err.Error()
 			for idx := 0; idx < buses.ApiMaxResults; idx++ {
@@ -128,7 +134,6 @@ func (app *App) Run() {
 			app.busArrivalText.Show()
 			app.busArrivalText.Render(app.device)
 		} else {
-			busArrivals, _ := buses.GetArrivals(app.client, busRoutesToFetch...)
 			if Debug {
 				fmt.Println("busArrivals", busArrivals)
 			}
