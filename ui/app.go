@@ -6,11 +6,14 @@ import (
 	"image/color"
 	"image/draw"
 	"net/http"
+	"sort"
+	"strconv"
 	"time"
 
 	"github.com/baritonehands/kindle-cta/buses"
 	"github.com/baritonehands/kindle-cta/domain"
 	"github.com/baritonehands/kindle-cta/trains"
+	"github.com/baritonehands/kindle-cta/utils"
 )
 
 const (
@@ -58,14 +61,14 @@ func NewApp(device draw.Image) *App {
 	app.busHeader = NewTrainHeader(0, 330, 600, headerHeight)
 	app.busHeader.Text = "Buses"
 
-	app.trainArrivalItems = make([]*TrainArrivalItem, trains.ApiMaxResults)
-	for idx := 0; idx < trains.ApiMaxResults; idx++ {
+	app.trainArrivalItems = make([]*TrainArrivalItem, trains.UiMaxResults)
+	for idx := 0; idx < trains.UiMaxResults; idx++ {
 		app.trainArrivalItems[idx] = NewTrainArrivalItem(0, headerHeight+(trainItemHeight*idx), 600, trainItemHeight)
 	}
 	app.trainArrivalText = NewText(0, headerHeight, 600, trainItemHeight)
 
-	app.busArrivalItems = make([]*BusArrivalItem, buses.ApiMaxResults)
-	for idx := 0; idx < buses.ApiMaxResults; idx++ {
+	app.busArrivalItems = make([]*BusArrivalItem, buses.UiMaxResults)
+	for idx := 0; idx < buses.UiMaxResults; idx++ {
 		app.busArrivalItems[idx] = NewBusArrivalItem(0, 380+(busItemHeight*idx), 600, busItemHeight)
 	}
 	app.busArrivalText = NewText(0, 380, 600, busItemHeight)
@@ -95,7 +98,7 @@ func (app *App) Run() {
 			app.trainHeader.Text = fmt.Sprintf("%s %s Line", trainArrivals.Root.Etas[0].StationName, trainArrivals.Root.Etas[0].Route)
 			app.trainHeader.Render(app.device)
 
-			for idx := 0; idx < trains.ApiMaxResults; idx++ {
+			for idx := 0; idx < trains.UiMaxResults; idx++ {
 				trainArrivalItem := app.trainArrivalItems[idx]
 				if idx < len(trainArrivals.Root.Etas) {
 					eta := &trainArrivals.Root.Etas[idx]
@@ -120,7 +123,6 @@ func (app *App) Run() {
 			app.busArrivalText.Value = err.Error()
 			for idx := 0; idx < buses.ApiMaxResults; idx++ {
 				busArrivalItem := app.busArrivalItems[idx]
-				busArrivalItem.SetEta(nil)
 				busArrivalItem.Render(app.device)
 			}
 			app.busArrivalText.Show()
@@ -130,23 +132,42 @@ func (app *App) Run() {
 			if Debug {
 				fmt.Println("busArrivals", busArrivals)
 			}
-			for idx := 0; idx < buses.ApiMaxResults; idx++ {
+
+			busGroups := utils.GroupBy(busArrivals.Root.Etas, func(item domain.BusEta) domain.BusGroupKey {
+				return domain.BusGroupKey{RouteId: item.RouteId, RouteDir: item.RouteDir, DestName: item.DestName}
+			})
+			sort.Slice(busGroups, func(i, j int) bool {
+				if busGroups[i][0].ArrivalPrediction == "DUE" {
+					return busGroups[j][0].ArrivalPrediction != "DUE"
+				} else if busGroups[j][0].ArrivalPrediction == "DUE" {
+					return false
+				} else {
+					lhs, _ := strconv.Atoi(busGroups[j][0].ArrivalPrediction)
+					rhs, _ := strconv.Atoi(busGroups[j][0].ArrivalPrediction)
+					return lhs < rhs
+				}
+			})
+
+			for idx := 0; idx < buses.UiMaxResults; idx++ {
 				busArrivalItem := app.busArrivalItems[idx]
-				if idx < len(busArrivals.Root.Etas) {
-					eta := &busArrivals.Root.Etas[idx]
+				if idx < len(busGroups) {
+					etas := busGroups[idx]
+					if len(etas) > 3 {
+						etas = etas[0 : len(etas)-3]
+					}
 					var route *domain.BusRoute
 					for _, r := range routes.Root.Routes {
-						if r.RouteId == eta.RouteId {
+						if r.RouteId == etas[0].RouteId {
 							route = &r
 							break
 						}
 					}
 
 					busArrivalItem.Route = route
-					busArrivalItem.SetEta(eta)
+					busArrivalItem.SetEtas(etas)
 				} else {
 					busArrivalItem.Route = nil
-					busArrivalItem.SetEta(nil)
+					busArrivalItem.SetEtas([]domain.BusEta{})
 				}
 
 				busArrivalItem.Render(app.device)

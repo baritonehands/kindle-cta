@@ -12,7 +12,8 @@ import (
 	"github.com/baritonehands/kindle-cta/domain"
 )
 
-const ApiMaxResults = 6
+const UiMaxResults = 8
+const ApiMaxResults = 4 * UiMaxResults
 
 func ctaBusTrackerUrl(endpoint string, params map[string]string) *url.URL {
 	apiUrl, _ := url.Parse(fmt.Sprintf("https://www.ctabustracker.com/bustime/api/v3/%s", endpoint))

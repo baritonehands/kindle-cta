@@ -11,7 +11,8 @@ import (
 	"github.com/baritonehands/kindle-cta/domain"
 )
 
-const ApiMaxResults = 4
+const UiMaxResults = 3
+const ApiMaxResults = UiMaxResults * 3
 
 func GetArrivals(httpClient *http.Client, stationId string) (*domain.TrainArrivalsResponse, error) {
 	apiUrl, _ := url.Parse("http://lapi.transitchicago.com/api/1.0/ttarrivals.aspx")

@@ -35,3 +35,7 @@ type BusEta struct {
 	Zone              string       `json:"zone"`
 	PassengerLoad     string       `json:"psgld"`
 }
+
+type BusGroupKey struct {
+	RouteId, RouteDir, DestName string
+}
