@@ -45,7 +45,8 @@ func (item *BusArrivalItem) Render(device draw.Image) {
 		Regular8PtBlack.PrintAt(device, destPos.X, destPos.Y, dest)
 
 		arrivals := []string{}
-		for _, eta := range item.etas {
+		for idx := 0; idx < len(item.etas) && idx < 3; idx++ {
+			eta := item.etas[idx]
 			arrivals = append(arrivals, eta.ArrivalPrediction)
 		}
 
@@ -72,5 +73,5 @@ func (item *BusArrivalItem) SetEtas(etas []domain.BusEta) {
 
 	prev := item.etas
 	item.etas = etas
-	item.dirty = item.dirty || reflect.DeepEqual(prev, etas)
+	item.dirty = item.dirty || !reflect.DeepEqual(prev, etas)
 }

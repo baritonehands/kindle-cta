@@ -48,7 +48,8 @@ func (item *TrainArrivalItem) Render(device draw.Image) {
 		now := time.Now()
 
 		arrivals := []string{}
-		for _, eta := range item.etas {
+		for idx := 0; idx < len(item.etas) && idx < 3; idx++ {
+			eta := item.etas[idx]
 			arrival := strconv.Itoa(int(math.Round(time.Time(eta.ArrivalTime).Sub(now).Minutes())))
 			if arrival == "0" {
 				arrival = "DUE"
@@ -78,5 +79,5 @@ func (item *TrainArrivalItem) SetEtas(etas []domain.TrainEta) {
 
 	prev := item.etas
 	item.etas = etas
-	item.dirty = item.dirty || reflect.DeepEqual(prev, etas)
+	item.dirty = item.dirty || !reflect.DeepEqual(prev, etas)
 }

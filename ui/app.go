@@ -157,9 +157,6 @@ func (app *App) Run() {
 				busArrivalItem := app.busArrivalItems[idx]
 				if idx < len(busGroups) {
 					etas := busGroups[idx]
-					if len(etas) > 3 {
-						etas = etas[0 : len(etas)-3]
-					}
 					var route *domain.BusRoute
 					for _, r := range routes.Root.Routes {
 						if r.RouteId == etas[0].RouteId {

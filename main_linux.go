@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/baritonehands/kindle-cta/ui"
@@ -18,12 +19,17 @@ func main() {
 
 	go exitOnInput()
 
-	app := ui.NewApp(kindle.Framebuffer())
+	device := kindle.Framebuffer()
+
+	app := ui.NewApp(device)
 	app.AfterRender(func(renderCount int) {
+		if ui.Debug {
+			fmt.Println("renderCount:", renderCount)
+		}
 		if renderCount == 0 {
-			kindle.Framebuffer().FullRefresh()
+			device.FullRefresh()
 		} else {
-			kindle.Framebuffer().DirtyRefresh()
+			device.DirtyRefresh()
 		}
 	})
 
