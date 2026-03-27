@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-
-	"github.com/simsor/go-kindle/framebuffer"
+	"image/draw"
 )
 
 type Component struct {
@@ -32,7 +31,7 @@ func (c *Component) Translate(pos image.Point) image.Point {
 	return c.Bounds.Min.Add(pos).Add(image.Pt(c.Margin+c.Padding, c.Margin+c.Padding))
 }
 
-func (c *Component) clear(device *framebuffer.Device) {
+func (c *Component) clear(device draw.Image) {
 	for y := c.Bounds.Min.Y; y < c.Bounds.Max.Y; y++ {
 		for x := c.Bounds.Min.X; x < c.Bounds.Max.X; x++ {
 			device.Set(x, y, color.White)
@@ -40,7 +39,7 @@ func (c *Component) clear(device *framebuffer.Device) {
 	}
 }
 
-func (c *Component) Render(device *framebuffer.Device) {
+func (c *Component) Render(device draw.Image) {
 	if !c.visible {
 		if c.dirty {
 			c.clear(device)
@@ -89,5 +88,5 @@ func (c *Component) Show() {
 }
 
 type Renderable interface {
-	Render(device *framebuffer.Device)
+	Render(device draw.Image)
 }

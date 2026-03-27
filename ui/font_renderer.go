@@ -18,18 +18,18 @@ type FontRenderer struct {
 	size, spacing float64
 }
 
-func NewFontRenderer(font *truetype.Font, dst draw.Image, size float64) *FontRenderer {
+func NewFontRenderer(font *truetype.Font, size float64) *FontRenderer {
 	c := freetype.NewContext()
 	c.SetDPI(dpi)
 	c.SetFont(font)
 	c.SetFontSize(size)
-	c.SetClip(dst.Bounds())
-	c.SetDst(dst)
 	c.SetSrc(image.Black)
 	return &FontRenderer{context: c, size: size, spacing: 1.5}
 }
 
-func (r *FontRenderer) PrintAt(x, y int, text string) error {
+func (r *FontRenderer) PrintAt(dst draw.Image, x, y int, text string) error {
+	r.context.SetDst(dst)
+	r.context.SetClip(dst.Bounds())
 	lines := strings.Split(text, "\n")
 	// Draw the text.
 	pt := freetype.Pt(x, y+int(r.context.PointToFixed(r.size)>>6))

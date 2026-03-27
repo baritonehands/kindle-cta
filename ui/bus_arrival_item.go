@@ -3,11 +3,11 @@ package ui
 import (
 	"fmt"
 	"image"
+	"image/draw"
 	"strconv"
 	"strings"
 
 	"github.com/baritonehands/kindle-cta/domain"
-	"github.com/simsor/go-kindle/framebuffer"
 )
 
 type BusArrivalItem struct {
@@ -16,16 +16,16 @@ type BusArrivalItem struct {
 	eta   *domain.BusEta
 }
 
-func NewBusArrivalItem(x, y int, width, height int) BusArrivalItem {
+func NewBusArrivalItem(x, y int, width, height int) *BusArrivalItem {
 	component := NewComponent(x, y, width, height)
 	component.Padding = 5
 
-	return BusArrivalItem{
+	return &BusArrivalItem{
 		Component: component,
 	}
 }
 
-func (item *BusArrivalItem) Render(device *framebuffer.Device) {
+func (item *BusArrivalItem) Render(device draw.Image) {
 	if item.eta == nil {
 		item.Component.Render(device)
 	} else if item.dirty {
@@ -37,11 +37,11 @@ func (item *BusArrivalItem) Render(device *framebuffer.Device) {
 		if Debug {
 			fmt.Printf("BusArrivalItem: Printing header at %d,%d\n", headerPos.X, headerPos.Y)
 		}
-		Bold12PtBlack.PrintAt(headerPos.X, headerPos.Y, header)
+		Bold12PtBlack.PrintAt(device, headerPos.X, headerPos.Y, header)
 
 		dest := fmt.Sprintf("%s to %s", strings.ToLower(item.eta.RouteDir), item.eta.DestName)
 		destPos := item.Translate(image.Pt(5, 32))
-		Regular8PtBlack.PrintAt(destPos.X, destPos.Y, dest)
+		Regular8PtBlack.PrintAt(device, destPos.X, destPos.Y, dest)
 
 		arrival := item.eta.ArrivalPrediction
 		arrivalInMins, err := strconv.Atoi(item.eta.ArrivalPrediction)
@@ -50,7 +50,7 @@ func (item *BusArrivalItem) Render(device *framebuffer.Device) {
 		}
 
 		arrivalPos := item.Translate(image.Pt(440, 5))
-		Bold16PtBlack.PrintAt(arrivalPos.X, arrivalPos.Y, arrival)
+		Bold16PtBlack.PrintAt(device, arrivalPos.X, arrivalPos.Y, arrival)
 
 		item.dirty = false
 	}

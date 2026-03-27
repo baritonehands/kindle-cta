@@ -3,8 +3,7 @@ package ui
 import (
 	"image"
 	"image/color"
-
-	"github.com/simsor/go-kindle/framebuffer"
+	"image/draw"
 )
 
 type Text struct {
@@ -24,11 +23,11 @@ func NewText(x, y, width, height int) Text {
 	}
 }
 
-func (t *Text) Render(device *framebuffer.Device) {
+func (t *Text) Render(device draw.Image) {
 	t.Component.Render(device)
 
 	if t.Component.visible {
 		textPos := t.Translate(image.Pt(15, 0))
-		Regular12PtBlack.PrintAt(textPos.X, textPos.Y, t.Value)
+		Regular12PtBlack.PrintAt(device, textPos.X, textPos.Y, t.Value)
 	}
 }

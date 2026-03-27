@@ -5,18 +5,16 @@ import (
 	"image/color"
 
 	"github.com/baritonehands/kindle-cta/utils"
-	"github.com/golang/freetype/truetype"
-	"github.com/simsor/go-kindle/kindle"
 )
 
-var FontFreeSansRegular *truetype.Font = utils.LoadFont("assets/FreeSans.ttf")
-var FontFreeSansBold *truetype.Font = utils.LoadFont("assets/FreeSansBold.ttf")
+var FontFreeSansRegular = utils.LoadFont("assets/FreeSans.ttf")
+var FontFreeSansBold = utils.LoadFont("assets/FreeSansBold.ttf")
 
-var Regular8PtBlack = NewFontRenderer(FontFreeSansRegular, kindle.Framebuffer(), 8)
-var Regular12PtBlack = NewFontRenderer(FontFreeSansRegular, kindle.Framebuffer(), 12)
-var Regular12PtWhite = NewFontRenderer(FontFreeSansRegular, kindle.Framebuffer(), 12)
-var Bold12PtBlack = NewFontRenderer(FontFreeSansBold, kindle.Framebuffer(), 12)
-var Bold16PtBlack = NewFontRenderer(FontFreeSansBold, kindle.Framebuffer(), 16)
+var Regular8PtBlack = NewFontRenderer(FontFreeSansRegular, 8)
+var Regular12PtBlack = NewFontRenderer(FontFreeSansRegular, 12)
+var Regular12PtWhite = NewFontRenderer(FontFreeSansRegular, 12)
+var Bold12PtBlack = NewFontRenderer(FontFreeSansBold, 12)
+var Bold16PtBlack = NewFontRenderer(FontFreeSansBold, 16)
 
 const Debug = false
 

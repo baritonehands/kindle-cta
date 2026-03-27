@@ -1,40 +1,39 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"net/http"
-	"time"
+	"image"
+	"image/png"
+	"os"
 
-	"github.com/baritonehands/kindle-cta/buses"
-	"github.com/baritonehands/kindle-cta/domain"
+	"github.com/baritonehands/kindle-cta/ui"
 )
 
-var routesToFetch = map[string][]string{
-	"73": {"4049", "4116"},
-	"82": {"18262", "11150"},
-}
-
 func main() {
-	client := &http.Client{
-		Timeout: 5 * time.Second,
-	}
+	rgba := image.NewRGBA(image.Rect(0, 0, 600, 800))
+	app := ui.NewApp(rgba)
 
-	routes, _ := buses.GetRoutes(client)
-	fmt.Println(routes)
-
-	//fmt.Println(buses.GetStops(client, "82", "Northbound"))
-	//fmt.Println(buses.GetStops(client, "82", "Southbound"))
-
-	for routeId, stopIds := range routesToFetch {
-		var route *domain.BusRoute
-		for _, r := range routes.Root.Routes {
-			if r.RouteId == routeId {
-				route = &r
-				break
-			}
+	app.AfterRender(func(renderCount int) {
+		// Save that RGBA image to disk.
+		outFile, err := os.Create("out.png")
+		if err != nil {
+			panic(err)
 		}
+		defer outFile.Close()
+		b := bufio.NewWriter(outFile)
+		err = png.Encode(b, rgba)
+		if err != nil {
+			panic(err)
+		}
+		err = b.Flush()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Wrote out.png OK.")
 
-		fmt.Println(route)
-		fmt.Println(buses.GetArrivals(client, stopIds...))
-	}
+		os.Exit(0)
+	})
+
+	app.Run()
 }

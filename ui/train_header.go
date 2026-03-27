@@ -2,8 +2,7 @@ package ui
 
 import (
 	"image"
-
-	"github.com/simsor/go-kindle/framebuffer"
+	"image/draw"
 )
 
 type TrainHeader struct {
@@ -20,9 +19,9 @@ func NewTrainHeader(x, y, width, height int) TrainHeader {
 	}
 }
 
-func (t *TrainHeader) Render(device *framebuffer.Device) {
+func (t *TrainHeader) Render(device draw.Image) {
 	t.Component.Render(device)
 
 	textPos := t.Translate(image.Pt(8, 0))
-	Bold16PtBlack.PrintAt(textPos.X, textPos.Y, t.Text)
+	Bold16PtBlack.PrintAt(device, textPos.X, textPos.Y, t.Text)
 }
